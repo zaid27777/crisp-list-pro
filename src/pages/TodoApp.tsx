@@ -10,7 +10,21 @@ import { AddTaskForm } from '@/components/AddTaskForm';
 
 export default function TodoApp() {
   const { user, signOut } = useAuth();
-  const { tasks, loading, createTask, toggleTask, moveTaskToTomorrow, deleteTask, fetchTasks } = useTasks();
+  const { 
+    tasks, 
+    loading, 
+    createTask, 
+    toggleTask, 
+    moveTaskToTomorrow, 
+    deleteTask, 
+    fetchTasks,
+    createSubtask,
+    updateSubtask,
+    deleteSubtask,
+    createNote,
+    updateNote,
+    deleteNote
+  } = useTasks();
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const todayTasks = tasks.filter(task => 
@@ -26,6 +40,18 @@ export default function TodoApp() {
 
   const handleAddTask = async (title: string, description?: string) => {
     await createTask(title, description, selectedDate);
+  };
+
+  const handleToggleSubtask = async (subtaskId: string, completed: boolean) => {
+    await updateSubtask(subtaskId, { completed });
+  };
+
+  const handleCreateSubtask = async (taskId: string, title: string) => {
+    await createSubtask(taskId, title);
+  };
+
+  const handleCreateNote = async (taskId: string, content: string) => {
+    await createNote(taskId, content);
   };
 
   if (loading) {
@@ -104,6 +130,12 @@ export default function TodoApp() {
                     onToggle={toggleTask}
                     onMoveToTomorrow={moveTaskToTomorrow}
                     onDelete={deleteTask}
+                    onCreateSubtask={handleCreateSubtask}
+                    onToggleSubtask={handleToggleSubtask}
+                    onDeleteSubtask={deleteSubtask}
+                    onCreateNote={handleCreateNote}
+                    onUpdateNote={updateNote}
+                    onDeleteNote={deleteNote}
                   />
                 ))
               )}
@@ -135,6 +167,20 @@ export default function TodoApp() {
                             <p className="text-sm text-[hsl(var(--ios-text-secondary))] mt-1">
                               {task.description}
                             </p>
+                          )}
+                          {task.subtasks && task.subtasks.length > 0 && (
+                            <div className="mt-2">
+                              <p className="text-xs text-[hsl(var(--ios-text-secondary))]">
+                                {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length} subtasks completed
+                              </p>
+                            </div>
+                          )}
+                          {task.notes && task.notes.length > 0 && (
+                            <div className="mt-1">
+                              <p className="text-xs text-[hsl(var(--ios-text-secondary))]">
+                                {task.notes.length} note{task.notes.length !== 1 ? 's' : ''}
+                              </p>
+                            </div>
                           )}
                           <div className="flex items-center gap-2 mt-2">
                             <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">

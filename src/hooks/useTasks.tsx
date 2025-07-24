@@ -13,6 +13,25 @@ export interface Task {
   created_at: string;
   updated_at: string;
   user_id: string;
+  subtasks?: Subtask[];
+  notes?: TaskNote[];
+}
+
+export interface Subtask {
+  id: string;
+  task_id: string;
+  title: string;
+  completed: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TaskNote {
+  id: string;
+  task_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function useTasks() {
@@ -26,7 +45,11 @@ export function useTasks() {
     try {
       let query = supabase
         .from('tasks')
-        .select('*')
+        .select(`
+          *,
+          subtasks(*),
+          task_notes(*)
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -37,7 +60,15 @@ export function useTasks() {
       const { data, error } = await query;
 
       if (error) throw error;
-      setTasks(data || []);
+      
+      // Transform the data to match our interface
+      const transformedTasks = (data || []).map(task => ({
+        ...task,
+        subtasks: task.subtasks || [],
+        notes: task.task_notes || []
+      }));
+      
+      setTasks(transformedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -64,17 +95,27 @@ export function useTasks() {
             user_id: user.id,
           },
         ])
-        .select()
+        .select(`
+          *,
+          subtasks(*),
+          task_notes(*)
+        `)
         .single();
 
       if (error) throw error;
 
-      setTasks((prev) => [data, ...prev]);
+      const transformedTask = {
+        ...data,
+        subtasks: data.subtasks || [],
+        notes: data.task_notes || []
+      };
+      
+      setTasks((prev) => [transformedTask, ...prev]);
       toast({
         title: "Success",
         description: "Task created successfully",
       });
-      return data;
+      return transformedTask;
     } catch (error) {
       console.error('Error creating task:', error);
       toast({
@@ -91,15 +132,25 @@ export function useTasks() {
         .from('tasks')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          subtasks(*),
+          task_notes(*)
+        `)
         .single();
 
       if (error) throw error;
 
+      const transformedTask = {
+        ...data,
+        subtasks: data.subtasks || [],
+        notes: data.task_notes || []
+      };
+
       setTasks((prev) =>
-        prev.map((task) => (task.id === id ? data : task))
+        prev.map((task) => (task.id === id ? transformedTask : task))
       );
-      return data;
+      return transformedTask;
     } catch (error) {
       console.error('Error updating task:', error);
       toast({
@@ -149,6 +200,222 @@ export function useTasks() {
     }
   };
 
+  const createSubtask = async (taskId: string, title: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('subtasks')
+        .insert([
+          {
+            task_id: taskId,
+            title,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the task in state to include the new subtask
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? { ...task, subtasks: [...(task.subtasks || []), data] }
+            : task
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Subtask created successfully",
+      });
+      return data;
+    } catch (error) {
+      console.error('Error creating subtask:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create subtask",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateSubtask = async (subtaskId: string, updates: Partial<Subtask>) => {
+    try {
+      const { data, error } = await supabase
+        .from('subtasks')
+        .update(updates)
+        .eq('id', subtaskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the task in state to reflect the subtask change
+      setTasks((prev) =>
+        prev.map((task) => ({
+          ...task,
+          subtasks: task.subtasks?.map((subtask) =>
+            subtask.id === subtaskId ? data : subtask
+          ) || []
+        }))
+      );
+
+      return data;
+    } catch (error) {
+      console.error('Error updating subtask:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update subtask",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteSubtask = async (subtaskId: string, taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('subtasks')
+        .delete()
+        .eq('id', subtaskId);
+
+      if (error) throw error;
+
+      // Update the task in state to remove the subtask
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                subtasks: task.subtasks?.filter((subtask) => subtask.id !== subtaskId) || []
+              }
+            : task
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Subtask deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting subtask:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subtask",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const createNote = async (taskId: string, content: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('task_notes')
+        .insert([
+          {
+            task_id: taskId,
+            content,
+          },
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the task in state to include the new note
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? { ...task, notes: [...(task.notes || []), data] }
+            : task
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Note added successfully",
+      });
+      return data;
+    } catch (error) {
+      console.error('Error creating note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateNote = async (noteId: string, content: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('task_notes')
+        .update({ content })
+        .eq('id', noteId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Update the task in state to reflect the note change
+      setTasks((prev) =>
+        prev.map((task) => ({
+          ...task,
+          notes: task.notes?.map((note) =>
+            note.id === noteId ? data : note
+          ) || []
+        }))
+      );
+
+      toast({
+        title: "Success",
+        description: "Note updated successfully",
+      });
+      return data;
+    } catch (error) {
+      console.error('Error updating note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update note",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteNote = async (noteId: string, taskId: string) => {
+    try {
+      const { error } = await supabase
+        .from('task_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+
+      // Update the task in state to remove the note
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                notes: task.notes?.filter((note) => note.id !== noteId) || []
+              }
+            : task
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "Note deleted successfully",
+      });
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete note",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchTasks();
@@ -164,5 +431,11 @@ export function useTasks() {
     toggleTask,
     moveTaskToTomorrow,
     deleteTask,
+    createSubtask,
+    updateSubtask,
+    deleteSubtask,
+    createNote,
+    updateNote,
+    deleteNote,
   };
 }
