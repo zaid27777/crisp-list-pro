@@ -15,7 +15,6 @@ export default function TodoApp() {
     loading, 
     createTask, 
     toggleTask, 
-    moveTaskToTomorrow, 
     moveTaskToLater,
     moveTaskToToday,
     deleteTask, 
@@ -138,7 +137,6 @@ export default function TodoApp() {
                     key={task.id}
                     task={task}
                     onToggle={toggleTask}
-                    onMoveToTomorrow={moveTaskToTomorrow}
                     onMoveToLater={moveTaskToLater}
                     onDelete={deleteTask}
                     onCreateSubtask={handleCreateSubtask}
@@ -169,7 +167,6 @@ export default function TodoApp() {
                     key={task.id}
                     task={task}
                     onToggle={toggleTask}
-                    onMoveToTomorrow={moveTaskToTomorrow}
                     onMoveToLater={moveTaskToLater}
                     onMoveToToday={moveTaskToToday}
                     onDelete={deleteTask}

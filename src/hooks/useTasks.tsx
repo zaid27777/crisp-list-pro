@@ -441,7 +441,6 @@ export function useTasks() {
     createTask,
     updateTask,
     toggleTask,
-    moveTaskToTomorrow,
     moveTaskToLater,
     moveTaskToToday,
     deleteTask,

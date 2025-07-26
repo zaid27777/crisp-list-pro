@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 interface TaskItemProps {
   task: Task;
   onToggle: (id: string, completed: boolean) => void;
-  onMoveToTomorrow: (id: string) => void;
   onMoveToLater?: (id: string) => void;
   onMoveToToday?: (id: string) => void;
   onDelete: (id: string) => void;
@@ -32,7 +31,6 @@ interface TaskItemProps {
 export function TaskItem({ 
   task, 
   onToggle, 
-  onMoveToTomorrow, 
   onMoveToLater,
   onMoveToToday,
   onDelete,
@@ -201,10 +199,6 @@ export function TaskItem({
             <DropdownMenuSeparator />
             {!task.completed && (task.status === 'today') && (
               <>
-                <DropdownMenuItem onClick={() => onMoveToTomorrow(task.id)}>
-                  <Clock className="h-4 w-4 mr-2" />
-                  Move to Tomorrow
-                </DropdownMenuItem>
                 {onMoveToLater && (
                   <DropdownMenuItem onClick={() => onMoveToLater(task.id)}>
                     <Timer className="h-4 w-4 mr-2" />
