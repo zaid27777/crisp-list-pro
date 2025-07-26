@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Clock, MoreHorizontal, Trash2, Plus, FileText, ChevronDown, ChevronRight } from 'lucide-react';
+import { Check, Clock, MoreHorizontal, Trash2, Plus, FileText, ChevronDown, ChevronRight, Timer, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ interface TaskItemProps {
   task: Task;
   onToggle: (id: string, completed: boolean) => void;
   onMoveToTomorrow: (id: string) => void;
+  onMoveToLater?: (id: string) => void;
+  onMoveToToday?: (id: string) => void;
   onDelete: (id: string) => void;
   onCreateSubtask: (taskId: string, title: string) => void;
   onToggleSubtask: (subtaskId: string, completed: boolean) => void;
@@ -31,6 +33,8 @@ export function TaskItem({
   task, 
   onToggle, 
   onMoveToTomorrow, 
+  onMoveToLater,
+  onMoveToToday,
   onDelete,
   onCreateSubtask,
   onToggleSubtask,
@@ -195,10 +199,24 @@ export function TaskItem({
               Add Note
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            {!task.completed && isToday && (
-              <DropdownMenuItem onClick={() => onMoveToTomorrow(task.id)}>
-                <Clock className="h-4 w-4 mr-2" />
-                Move to Tomorrow
+            {!task.completed && (task.status === 'today') && (
+              <>
+                <DropdownMenuItem onClick={() => onMoveToTomorrow(task.id)}>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Move to Tomorrow
+                </DropdownMenuItem>
+                {onMoveToLater && (
+                  <DropdownMenuItem onClick={() => onMoveToLater(task.id)}>
+                    <Timer className="h-4 w-4 mr-2" />
+                    Do It Later
+                  </DropdownMenuItem>
+                )}
+              </>
+            )}
+            {!task.completed && (task.status === 'later') && onMoveToToday && (
+              <DropdownMenuItem onClick={() => onMoveToToday(task.id)}>
+                <Calendar className="h-4 w-4 mr-2" />
+                Move to Today
               </DropdownMenuItem>
             )}
             <DropdownMenuItem 

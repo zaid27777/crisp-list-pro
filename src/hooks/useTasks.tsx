@@ -13,6 +13,7 @@ export interface Task {
   created_at: string;
   updated_at: string;
   user_id: string;
+  status: 'today' | 'later' | 'completed';
   subtasks?: Subtask[];
   notes?: TaskNote[];
 }
@@ -64,6 +65,7 @@ export function useTasks() {
       // Transform the data to match our interface
       const transformedTasks = (data || []).map(task => ({
         ...task,
+        status: task.status as 'today' | 'later' | 'completed',
         subtasks: task.subtasks || [],
         notes: task.task_notes || []
       }));
@@ -106,6 +108,7 @@ export function useTasks() {
 
       const transformedTask = {
         ...data,
+        status: data.status as 'today' | 'later' | 'completed',
         subtasks: data.subtasks || [],
         notes: data.task_notes || []
       };
@@ -143,6 +146,7 @@ export function useTasks() {
 
       const transformedTask = {
         ...data,
+        status: data.status as 'today' | 'later' | 'completed',
         subtasks: data.subtasks || [],
         notes: data.task_notes || []
       };
@@ -174,6 +178,14 @@ export function useTasks() {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const due_date = tomorrow.toISOString().split('T')[0];
     return updateTask(id, { due_date });
+  };
+
+  const moveTaskToLater = async (id: string) => {
+    return updateTask(id, { status: 'later' });
+  };
+
+  const moveTaskToToday = async (id: string) => {
+    return updateTask(id, { status: 'today' });
   };
 
   const deleteTask = async (id: string) => {
@@ -430,6 +442,8 @@ export function useTasks() {
     updateTask,
     toggleTask,
     moveTaskToTomorrow,
+    moveTaskToLater,
+    moveTaskToToday,
     deleteTask,
     createSubtask,
     updateSubtask,

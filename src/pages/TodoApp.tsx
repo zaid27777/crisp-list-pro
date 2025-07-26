@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, History, LogOut, User } from 'lucide-react';
+import { Calendar, History, LogOut, User, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,6 +16,8 @@ export default function TodoApp() {
     createTask, 
     toggleTask, 
     moveTaskToTomorrow, 
+    moveTaskToLater,
+    moveTaskToToday,
     deleteTask, 
     fetchTasks,
     createSubtask,
@@ -28,7 +30,11 @@ export default function TodoApp() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const todayTasks = tasks.filter(task => 
-    task.due_date === new Date().toISOString().split('T')[0]
+    task.status === 'today' && !task.completed
+  );
+
+  const laterTasks = tasks.filter(task => 
+    task.status === 'later' && !task.completed
   );
 
   const completedTasks = tasks.filter(task => task.completed);
@@ -99,13 +105,17 @@ export default function TodoApp() {
 
         {/* Main Content */}
         <Tabs defaultValue="today" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 bg-white/60 backdrop-blur-sm rounded-xl">
+          <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm rounded-xl">
             <TabsTrigger value="today" className="data-[state=active]:bg-[hsl(var(--ios-blue))] data-[state=active]:text-white">
-              <Calendar className="h-4 w-4 mr-2" />
+              <Calendar className="h-4 w-4 mr-1" />
               Today
             </TabsTrigger>
+            <TabsTrigger value="later" className="data-[state=active]:bg-[hsl(var(--ios-blue))] data-[state=active]:text-white">
+              <Clock className="h-4 w-4 mr-1" />
+              Later
+            </TabsTrigger>
             <TabsTrigger value="history" className="data-[state=active]:bg-[hsl(var(--ios-blue))] data-[state=active]:text-white">
-              <History className="h-4 w-4 mr-2" />
+              <History className="h-4 w-4 mr-1" />
               History
             </TabsTrigger>
           </TabsList>
@@ -129,6 +139,39 @@ export default function TodoApp() {
                     task={task}
                     onToggle={toggleTask}
                     onMoveToTomorrow={moveTaskToTomorrow}
+                    onMoveToLater={moveTaskToLater}
+                    onDelete={deleteTask}
+                    onCreateSubtask={handleCreateSubtask}
+                    onToggleSubtask={handleToggleSubtask}
+                    onDeleteSubtask={deleteSubtask}
+                    onCreateNote={handleCreateNote}
+                    onUpdateNote={updateNote}
+                    onDeleteNote={deleteNote}
+                  />
+                ))
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="later" className="space-y-4">
+            <div className="space-y-3">
+              {laterTasks.length === 0 ? (
+                <Card className="border-0 bg-white/60 backdrop-blur-sm" style={{ boxShadow: 'var(--shadow-ios-card)' }}>
+                  <CardContent className="p-6 text-center">
+                    <Clock className="h-12 w-12 mx-auto mb-3 text-[hsl(var(--ios-text-secondary))]" />
+                    <p className="text-[hsl(var(--ios-text-secondary))]">No tasks for later</p>
+                    <p className="text-sm text-[hsl(var(--ios-text-secondary))] mt-1">Move tasks here when you want to do them later!</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                laterTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onToggle={toggleTask}
+                    onMoveToTomorrow={moveTaskToTomorrow}
+                    onMoveToLater={moveTaskToLater}
+                    onMoveToToday={moveTaskToToday}
                     onDelete={deleteTask}
                     onCreateSubtask={handleCreateSubtask}
                     onToggleSubtask={handleToggleSubtask}

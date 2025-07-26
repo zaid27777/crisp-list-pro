@@ -46,7 +46,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       task_notes: {
@@ -78,7 +78,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "tasks"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       tasks: {
@@ -89,6 +89,7 @@ export type Database = {
           description: string | null
           due_date: string
           id: string
+          status: string
           title: string
           updated_at: string
           user_id: string
@@ -100,6 +101,7 @@ export type Database = {
           description?: string | null
           due_date?: string
           id?: string
+          status?: string
           title: string
           updated_at?: string
           user_id: string
@@ -111,6 +113,7 @@ export type Database = {
           description?: string | null
           due_date?: string
           id?: string
+          status?: string
           title?: string
           updated_at?: string
           user_id?: string
