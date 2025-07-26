@@ -116,7 +116,15 @@ export default function Auth() {
       {/* Footer */}
       <div className="text-center mt-8">
         <p className="text-xs text-[hsl(var(--ios-text-secondary))]">
-          developed by inamdarconsultancy
+          developed by{' '}
+          <a 
+            href="https://inamdarconsultancy.com/apps" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-[hsl(var(--ios-blue))] hover:underline"
+          >
+            inamdarconsultancy
+          </a>
         </p>
       </div>
     </div>
