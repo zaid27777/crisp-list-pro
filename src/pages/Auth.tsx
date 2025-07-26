@@ -112,6 +112,13 @@ export default function Auth() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Footer */}
+      <div className="text-center mt-8">
+        <p className="text-xs text-[hsl(var(--ios-text-secondary))]">
+          developed by inamdarconsultancy
+        </p>
+      </div>
     </div>
   );
 }

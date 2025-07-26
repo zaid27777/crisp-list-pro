@@ -238,6 +238,13 @@ export default function TodoApp() {
             </Card>
           </TabsContent>
         </Tabs>
+        
+        {/* Footer */}
+        <div className="text-center mt-8 pb-4">
+          <p className="text-xs text-[hsl(var(--ios-text-secondary))]">
+            developed by inamdarconsultancy
+          </p>
+        </div>
       </div>
     </div>
   );
